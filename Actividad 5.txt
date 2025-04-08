@@ -1,0 +1,133 @@
+Reading table information for completion of table and column
+ names
+You can turn off this feature to get a quicker startup with -A
+
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 10226870
+Server version: 8.0.40 Source distribution
+
+Copyright (c) 2000, 2022, Oracle and/or its affiliates.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql> use almendrita110908$default
+Database changed
+mysql> CREATE TABLE RegistroIndeterminado (
+    ->     Flujo VARCHAR(10),
+    ->     Paso INT,
+    ->     Estado VARCHAR(20)
+    -> );
+Query OK, 0 rows affected (0.03 sec)
+
+mysql> INSERT INTO RegistroIndeterminado (Flujo, Paso, Estado)
+    -> VALUES
+    -> ('Alpha', 1, 'Error'),
+    -> ('Alpha', 2, 'Finalizado'),
+    -> ('Alpha', 3, 'Corriendo'),
+    -> ('Bravo', 1, 'Finalizado'),
+    -> ('Bravo', 2, 'Finalizado'),
+    -> ('Charlie', 1, 'Corriendo'),
+    -> ('Charlie', 2, 'Corriendo'),
+    -> ('Delta', 1, 'Error'),
+    -> ('Delta', 2, 'Error'),
+    -> ('Echo', 1, 'Corriendo'),
+    -> ('Echo', 2, 'Finalizado');
+Query OK, 11 rows affected (0.01 sec)
+Records: 11  Duplicates: 0  Warnings: 0
+
+mysql> SELECT
+    ->     Flujo,
+    ->     CASE
+    ->         WHEN COUNT(DISTINCT Estado) = 1 THEN MAX(Estado)
+    ->         WHEN COUNT(CASE WHEN Estado = 'Error' THEN 1 END) > 0 THEN 'Indeterminado'
+    ->         WHEN COUNT(CASE WHEN Estado = 'Finalizado' THEN 1 END) > 0 AND COUNT(CASE WHEN Estado = 'Corriendo' THEN 1 END) > 0 THEN 'Corriendo'
+    ->         ELSE MAX(Estado)
+    ->     END AS EstadoGeneral
+    -> FROM
+    ->     RegistroIndeterminado
+    -> GROUP BY
+    ->     Flujo;
++---------+---------------+
+| Flujo   | EstadoGeneral |
++---------+---------------+
+| Alfa | Indeterminado |
+| Bravo | Finalizado |
+| Charlie | Corriendo |
+| Delta | Error |
+| Eco | Corriendo |
++---------+---------------+
+5 filas en conjunto (0,00 segundos)
+
+mysql>CREAR TABLA Grupos (
+    -> Secuencia INT,
+    -> Valor VARCHAR(50)
+    -> );
+Consulta correcta, 0 filas afectadas (0,03 segundos)
+
+mysql>INSERTAR EN Grupos (Secuencia, Valor)
+    -> VALORES
+    -> (1, 'SELECCIONAR'),
+    -> (2, 'Producto,'),
+    -> (3, 'Precio,'),
+    -> (4, 'Disponibilidad,'),
+    -> (5, 'DESDE'),
+    -> (6, 'Productos'),
+    -> (7, 'DONDE'),
+    -> (8, 'Precio'),
+    -> (9, ">100');
+Consulta correcta, 9 filas afectadas (0,01 segundos)
+Registros: 9 Duplicados: 0 Advertencias: 0
+
+mysql> SELECCIONAR
+    -> GROUP_CONCAT(Valor ORDEN POR Secuencia SEPARADOR '') AS Sintaxis
+    -> DESDE
+    -> Grupos;
++---------------------------------------------------------------------+
+| Sintaxis                                                                  |
++---------------------------------------------------------------------+
+| SELECCIONE Producto, Precio, Disponibilidad, DE Productos WHERE Precio >100 |
++-----------------------------------------------------
+----------------+
+1 fila en el conjunto (0,00 s) 
+
+MySQL>
+    ->     JugadorA INT,
+    ->     JugadorB INT,
+    ->     Marcador INT
+    -> );
+^C
+mysql> CREATE TABLE Marcadores (
+    -> JugadorA INT,
+    -> JugadorB INT,
+    -> Marcador INT
+    -> );
+Consulta correcta, 0 filas afectadas (0,03 segundos)
+
+mysql>INSERTAR EN Marcadores (JugadorA, JugadorB, Marcador)
+VALORES
+    -> (1001, 2002, 150),
+    -> (3003, 4004, 15),
+    -> (4004, 3003, 125);
+Consulta correcta, 3 filas afectadas (0,01 segundos)
+Registros: 3 Duplicados: 0 Advertencias: 0
+
+mysql> SELECT
+    ->     LEAST(JugadorA, JugadorB) AS JugadorA,
+    ->     GREATEST(JugadorA, JugadorB) AS JugadorB,
+    ->     SUM(Marcador) AS Marcador
+    -> FROM
+    ->     Marcadores
+    -> GROUP BY
+    ->     LEAST(JugadorA, JugadorB),
+    ->     GREATEST(JugadorA, JugadorB);
++----------+----------+----------+
+| JugadorA | JugadorB | Marcador |
++----------+----------+----------+
+|     1001 |     2002 |      150 |
+|     3003 |     4004 |      140 |
++----------+----------+----------+
+2 rows in set (0.00 sec)
